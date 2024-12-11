@@ -1,0 +1,38 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#ffffff"/>
+  
+  <!-- Grid lines -->
+  <g stroke="#e0e0e0" stroke-width="1">
+    <!-- Vertical grid lines -->
+    <path d="M100,50 L100,550" />
+    <path d="M200,50 L200,550" />
+    <path d="M300,50 L300,550" />
+    <path d="M400,50 L400,550" />
+    <path d="M500,50 L500,550" />
+    <path d="M600,50 L600,550" />
+    <path d="M700,50 L700,550" />
+    
+    <!-- Horizontal grid lines -->
+    <path d="M50,100 L750,100" />
+    <path d="M50,200 L750,200" />
+    <path d="M50,300 L750,300" />
+    <path d="M50,400 L750,400" />
+    <path d="M50,500 L750,500" />
+  </g>
+  
+  <!-- Brachistochrone curve -->
+  <path d="M50,50 Q400,400 750,550" stroke="#2196F3" fill="none" stroke-width="3"/>
+  
+  <!-- Straight line (for comparison) -->
+  <path d="M50,50 L750,550" stroke="#999" stroke-dasharray="5,5" stroke-width="2"/>
+  
+  <!-- Points -->
+  <circle cx="50" cy="50" r="6" fill="#4CAF50"/> <!-- Start point -->
+  <circle cx="750" cy="550" r="6" fill="#f44336"/> <!-- End point -->
+  
+  <!-- Labels -->
+  <text x="35" y="40" font-family="Arial" font-size="14">A</text>
+  <text x="765" y="565" font-family="Arial" font-size="14">B</text>
+  <text x="400" y="30" font-family="Arial" font-size="16" text-anchor="middle">Brachistochrone Curve</text>
+</svg>

@@ -1,0 +1,75 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+
+\title{Optimizing Descent: An Exploration of the Brachistochrone Problem}
+\author{Nnamdi Michael Okpala}
+\date{October 31, 2024}
+
+\begin{document}
+\maketitle
+
+\section{Introduction to the Brachistochrone Problem}
+The Brachistochrone problem, posed by Johann Bernoulli in 1696, seeks to find the curve of fastest descent between two points under the influence of gravity. The solution, remarkably discovered by Isaac Newton in a single night, is the cycloid—a curve traced by a point on the circumference of a rolling wheel.
+
+\section{Mathematical Formulation}
+Let us consider two points $A(x_1, y_1)$ and $B(x_2, y_2)$ in a vertical plane. The problem is to find the curve $y(x)$ along which a particle, starting from rest at $A$ and moving under gravity, will reach $B$ in minimum time.
+
+\subsection{Key Equations}
+The time of descent is given by:
+\[
+T = \int_{A}^{B} \sqrt{\frac{1 + (dy/dx)^2}{2gy}} dx
+\]
+where:
+\begin{itemize}
+    \item $g$ is the acceleration due to gravity
+    \item $y$ is the vertical coordinate
+    \item $dy/dx$ represents the slope of the curve
+\end{itemize}
+
+\section{Optimized Computational Approach}
+Our implementation uses a weighted average method to approximate the Brachistochrone curve efficiently:
+
+\subsection{Core Algorithm}
+\begin{enumerate}
+    \item Calculate the weighted centroid $G$ of points $A$, $B$, and the control point $C$:
+    \[
+    G = \left(\frac{x_1 + x_2 + x_3}{3}, \frac{y_1 + y_2 + y_3}{3}\right)
+    \]
+    
+    \item Apply the angle factor $\theta$ to optimize the descent:
+    \[
+    P = G \cdot \sin(\theta)
+    \]
+    
+    \item Generate the curve using quadratic spline interpolation:
+    \[
+    S(t) = (1-t)^2P_1 + 2t(1-t)P_c + t^2P_2
+    \]
+    where $P_c$ is the control point and $t \in [0,1]$
+\end{enumerate}
+
+\section{Time Complexity Analysis}
+The optimized implementation achieves:
+\begin{itemize}
+    \item Point calculations: $O(1)$
+    \item Curve generation: $O(n)$ where $n$ is the number of points on the curve
+    \item Overall memory usage: $O(1)$ for core calculations
+\end{itemize}
+
+\section{Implementation Benefits}
+Our approach offers several advantages:
+\begin{itemize}
+    \item Reduced computational overhead
+    \item Memory-efficient calculations
+    \item Smooth, continuous curve approximation
+    \item Real-time interactive visualization capabilities
+\end{itemize}
+
+\section{Conclusion}
+This optimization of the Brachistochrone problem demonstrates how geometric principles and weighted averages can be used to create efficient approximations of complex mathematical curves. The approach balances computational efficiency with accuracy, making it suitable for real-world applications.
+
+\end{document}
