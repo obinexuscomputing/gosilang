@@ -20,4 +20,4 @@ Gosilang is a programming language designed with Programs as Primary Interface (
 Instructions for building and developing Gosilang.
 
 ## License
-Specify your license here.
+MIT
