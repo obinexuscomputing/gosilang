@@ -1,0 +1,70 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\title{Automaton State Minimization and AST Optimization}
+\author{Nnamdi Michale Okpala}
+\date{11/12/2024}
+
+\begin{document}
+\maketitle
+
+\section{Layman's Explanation}
+Automaton state minimization is about taking a finite state machine (FSM)---which may have redundant states---and simplifying it to use the smallest number of states possible, while still performing the same behavior. This concept is particularly relevant when associated with minimizing the \textbf{abstract syntax tree (AST)}, which is a tree representation of the machine's rules or transitions.
+
+\section{Formal Definition}
+
+\subsection{Automaton Representation}
+Let the automaton $A$ be represented as a 5-tuple:
+\[
+A = (Q, \Sigma, \delta, q_0, F)
+\]
+where:
+\begin{itemize}
+    \item $Q$: Finite set of states
+    \item $\Sigma$: Finite alphabet (input symbols)
+    \item $\delta: Q \times \Sigma \to Q$: Transition function
+    \item $q_0 \in Q$: Initial state
+    \item $F \subseteq Q$: Set of accepting (final) states
+\end{itemize}
+
+\subsection{Abstract Syntax Tree (AST)}
+The AST represents the structure of transitions and states in the automaton as a tree. Each node corresponds to:
+\begin{itemize}
+    \item A state $q \in Q$
+    \item An input $\sigma \in \Sigma$ or output transition $\delta(q, \sigma)$
+\end{itemize}
+
+\subsection{State Equivalence}
+Define two states $p, q \in Q$ as \textbf{equivalent} ($p \sim q$) if for every possible input sequence $w \in \Sigma^*$, the automaton starting at $p$ and $q$ ends in the same type of state (both accepting or both non-accepting).
+
+Mathematically:
+\[
+p \sim q \iff \forall w \in \Sigma^*, \delta^*(p, w) \in F \iff \delta^*(q, w) \in F
+\]
+
+Here, $\delta^*$ is the extended transition function for sequences:
+\[
+\delta^*(q, \epsilon) = q, \quad \delta^*(q, a w) = \delta^*(\delta(q, a), w)
+\]
+
+\subsection{Minimization}
+The minimization process constructs a new automaton $A' = (Q', \Sigma, \delta', q_0', F')$ where:
+\begin{itemize}
+    \item $Q'$: Partition of $Q$ into equivalence classes under $\sim$
+    \item $\delta'(C, a) = [\delta(q, a)]$ for any $q \in C$, where $C$ is an equivalence class
+    \item $q_0' = [q_0]$ (the equivalence class containing the initial state)
+    \item $F' = \{C \in Q' \mid C \cap F \neq \emptyset\}$
+\end{itemize}
+
+\section{Summary}
+To minimize an automaton:
+\begin{enumerate}
+    \item Identify equivalent states using the equivalence relation $\sim$
+    \item Partition states into equivalence classes
+    \item Construct the reduced automaton using the partitions
+    \item Reflect the minimized structure in the AST by reducing nodes and transitions accordingly
+\end{enumerate}
+
+\end{document}
