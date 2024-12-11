@@ -1,0 +1,175 @@
+{
+  "main": {
+    "id": "ef8757323b438efc",
+    "type": "split",
+    "children": [
+      {
+        "id": "3768758db95f0969",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a1f9b302d9f44e24",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/Automaton State Minimization.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Automaton State Minimization"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c2f42d240c9c16de",
+    "type": "split",
+    "children": [
+      {
+        "id": "e64d91518369c063",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6c2c65a95c17781d",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "03b357318bc24cae",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "7854d97da360cb04",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "d4270233de9a7920",
+    "type": "split",
+    "children": [
+      {
+        "id": "e051934b69ca918d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "bff32782d5c0f82b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "docs/Automaton State Minimization.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Automaton State Minimization"
+            }
+          },
+          {
+            "id": "ffd71596ad4491e9",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "docs/Automaton State Minimization.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Automaton State Minimization"
+            }
+          },
+          {
+            "id": "707820f0a21be06c",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "56b18abb9d15ea3b",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "docs/Automaton State Minimization.md"
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Automaton State Minimization"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "6c2c65a95c17781d",
+  "lastOpenFiles": [
+    "Gosilang(Gossip Language)/Gosilang(Gossip Programming Language).cbp",
+    "Gosilang(Gossip Language)/Gosilang(Gossip Language).cbp",
+    "Gosilang(Gossip Language)",
+    "dev-gosilang.workspace",
+    "dev-gosilang.workspace.layout",
+    "README.md",
+    "docs/Automaton State Minimization.md"
+  ]
+}
