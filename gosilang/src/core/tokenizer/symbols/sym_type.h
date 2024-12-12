@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// For Compile-Type safety,I have seperated the
+// For Compile-Type safety,I have separated the
 // the token type and token value in two modules
 // sym_type and sym_value.
 
