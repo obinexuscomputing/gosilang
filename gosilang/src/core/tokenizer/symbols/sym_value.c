@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 // ====== Value Management Functions ======
-
 LiteralValue* CreateLiteralValue(ValueType type) {
     LiteralValue* value = (LiteralValue*)malloc(sizeof(LiteralValue));
     if (!value) return NULL;
