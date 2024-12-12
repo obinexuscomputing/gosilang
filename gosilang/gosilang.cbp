@@ -43,6 +43,8 @@
 		<Unit filename="docs/specs/language/README.md" />
 		<Unit filename="docs/specs/subsystems/.gitkeep" />
 		<Unit filename="docs/specs/subsystems/README.md" />
+		<Unit filename="gosilang.layout" />
+		<Unit filename="obj/debug/src/core/tokenizer/symbols/sym_type.o" />
 		<Unit filename="programs/examples/.gitkeep" />
 		<Unit filename="programs/examples/README.md" />
 		<Unit filename="programs/subsystems/gui/.gitkeep" />
@@ -83,15 +85,16 @@
 		<Unit filename="src/core/parser/README.md" />
 		<Unit filename="src/core/tokenizer/lexer/.gitkeep" />
 		<Unit filename="src/core/tokenizer/lexer/README.md" />
-		<Unit filename="src/core/tokenizer/sym_value.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="src/core/tokenizer/symbols/.gitkeep" />
 		<Unit filename="src/core/tokenizer/symbols/README.md" />
 		<Unit filename="src/core/tokenizer/symbols/sym_type.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/core/tokenizer/symbols/sym_type.h" />
+		<Unit filename="src/core/tokenizer/symbols/sym_value.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/core/tokenizer/symbols/sym_value.h" />
 		<Unit filename="src/runtime/concurrency/futures/.gitkeep" />
 		<Unit filename="src/runtime/concurrency/futures/README.md" />
 		<Unit filename="src/runtime/concurrency/lazy/.gitkeep" />
@@ -100,6 +103,8 @@
 		<Unit filename="src/runtime/debug/ploffer/README.md" />
 		<Unit filename="src/runtime/debug/profiler/.gitkeep" />
 		<Unit filename="src/runtime/debug/profiler/README.md" />
+		<Unit filename="src/runtime/dom-asm/.gitkeep" />
+		<Unit filename="src/runtime/dom-asm/README.md" />
 		<Unit filename="src/runtime/domasm/.gitkeep" />
 		<Unit filename="src/runtime/domasm/README.md" />
 		<Unit filename="src/runtime/web/.gitkeep" />
