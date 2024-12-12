@@ -142,7 +142,6 @@ typedef struct Token {
     struct Token* next;     // For linked list implementation
     struct Token* prev;     // For bidirectional traversal
 } Token;
-
 // Context structure for token processing
 typedef struct TokenContext {
     Token* current;
@@ -172,9 +171,9 @@ bool TokenType_isValidTransition(TokenType from, TokenType to);
 // Token creation and management functions
 Token* Token_create(TokenType type, const char* value);
 void Token_destroy(Token* token);
-Token* Token_copy(const Token* source);
-bool Token_equals(const Token* t1, const Token* t2);
 void Token_print(const Token* token, FILE* stream);
+Token* Token_copy(const Token* token);
+Token* ParseExpression(Token* tokens[], int count);
 
 // Context management functions
 TokenContext* TokenContext_create(void);

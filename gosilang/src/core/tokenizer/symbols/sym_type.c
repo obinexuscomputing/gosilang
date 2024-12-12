@@ -1,5 +1,48 @@
 #include "sym_type.h"
 
+
+// Token creation and management
+Token* Token_create(TokenType type, const char* value) {
+    Token* token = (Token*)malloc(sizeof(Token));
+    if (!token) return NULL;
+
+    token->type = type;
+    token->category = TokenType_getCategory(type);
+    token->value = value ? strdup(value) : NULL;
+    token->line_number = 0;
+    token->column_number = 0;
+    token->file_name = NULL;
+    token->next = NULL;
+    token->prev = NULL;
+
+    return token;
+}
+
+void Token_destroy(Token* token) {
+    if (!token) return;
+    if (token->value) free(token->value);
+    free(token);
+}
+
+Token* Token_copy(const Token* source) {
+    if (!source) return NULL;
+    Token* copy = Token_create(source->type, source->value);
+    if (copy) {
+        copy->line_number = source->line_number;
+        copy->column_number = source->column_number;
+        copy->file_name = source->file_name;
+    }
+    return copy;
+}
+
+void Token_print(const Token* token, FILE* stream) {
+    if (!token) return;
+    fprintf(stream, "Token{type=%d, value='%s', line=%d, col=%d}",
+            token->type,
+            token->value ? token->value : "null",
+            token->line_number,
+            token->column_number);
+}
 // Token category mapping
 TokenCategory TokenType_getCategory(TokenType type) {
     if (type >= TOKEN_LITERAL_VALUE && type <= TOKEN_LITERAL_ARRAY)
@@ -61,24 +104,6 @@ const char* TokenType_toString(TokenType type) {
     return "UNKNOWN";
 }
 
-// Token creation and management
-Token* Token_create(TokenType type, const char* value) {
-    Token* token = (Token*)malloc(sizeof(Token));
-    if (!token) return NULL;
-
-    token->type = type;
-    token->category = TokenType_getCategory(type);
-    token->value = value ? strdup(value) : NULL;
-    token->line_number = 0;
-    token->column_number = 0;
-    token->file_name = NULL;
-    TokenAttributes_init(&token->attributes);
-    token->next = NULL;
-    token->prev = NULL;
-
-    return token;
-}
-
 void Token_destroy(Token* token) {
     if (token) {
         free(token->value);
@@ -86,19 +111,6 @@ void Token_destroy(Token* token) {
     }
 }
 
-Token* Token_copy(const Token* source) {
-    if (!source) return NULL;
-
-    Token* copy = Token_create(source->type, source->value);
-    if (!copy) return NULL;
-
-    copy->line_number = source->line_number;
-    copy->column_number = source->column_number;
-    copy->file_name = source->file_name;
-    TokenAttributes_copy(&copy->attributes, &source->attributes);
-
-    return copy;
-}
 
 bool Token_equals(const Token* t1, const Token* t2) {
     if (!t1 || !t2) return false;
@@ -108,15 +120,7 @@ bool Token_equals(const Token* t1, const Token* t2) {
            TokenAttributes_equals(&t1->attributes, &t2->attributes);
 }
 
-void Token_print(const Token* token, FILE* stream) {
-    if (!token) return;
 
-    fprintf(stream, "Token[type=%s, value=%s, line=%d, col=%d]",
-            TokenType_toString(token->type),
-            token->value ? token->value : "null",
-            token->line_number,
-            token->column_number);
-}
 
 // Context management
 TokenContext* TokenContext_create(void) {
@@ -167,6 +171,13 @@ void TokenContext_setError(TokenContext* context, const char* message) {
     context->error_count++;
 }
 
+Token* ParseExpression(Token* tokens[], int count) {
+    if (!tokens || count <= 0) return NULL;
+
+    // For now, just return a copy of the first token as a simple demonstration
+    // In a real implementation, this would do proper expression parsing
+    return Token_copy(tokens[0]);
+}
 // Attribute management
 void TokenAttributes_init(TokenAttributes* attrs) {
     if (!attrs) return;
