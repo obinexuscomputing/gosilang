@@ -1,165 +1,320 @@
 #include "sym_type.h"
 
-// Convert token type to string for debugging and error messages
-const char* TokenType_toString(enum TokenType type) {
-    switch (type) {
+// Token category mapping
+TokenCategory TokenType_getCategory(TokenType type) {
+    if (type >= TOKEN_LITERAL_VALUE && type <= TOKEN_LITERAL_ARRAY)
+        return TOKEN_CATEGORY_LITERAL;
+    if (type >= TOKEN_EXPR_BINARY && type <= TOKEN_EXPR_SIZEOF)
+        return TOKEN_CATEGORY_EXPRESSION;
+    if (type >= TOKEN_STMT_IF && type <= TOKEN_STMT_LABEL)
+        return TOKEN_CATEGORY_STATEMENT;
+    if (type >= TOKEN_DECL_VARIABLE && type <= TOKEN_DECL_REGISTER)
+        return TOKEN_CATEGORY_DECLARATION;
+    if (type >= TOKEN_SCOPE_BEGIN && type <= TOKEN_BRACKET_CLOSE)
+        return TOKEN_CATEGORY_SCOPE;
+    if (type >= TOKEN_PUNCT_SEMICOLON && type <= TOKEN_PUNCT_ELLIPSIS)
+        return TOKEN_CATEGORY_PUNCTUATION;
+    if (type >= TOKEN_TYPE_VOID && type <= TOKEN_TYPE_ENUM)
+        return TOKEN_CATEGORY_TYPE;
+    return TOKEN_CATEGORY_SPECIAL;
+}
+
+// Convert token type to string
+const char* TokenType_toString(TokenType type) {
+    static const char* token_names[] = {
         // Literals
-        case TOKEN_LITERAL_VALUE: return "LITERAL_VALUE";
-        case TOKEN_LITERAL_KEYWORD: return "LITERAL_KEYWORD";
-        case TOKEN_LITERAL_DELIMITER: return "LITERAL_DELIMITER";
-        case TOKEN_LITERAL_OPERATOR: return "LITERAL_OPERATOR";
-        case TOKEN_LITERAL_IDENTIFIER: return "LITERAL_IDENTIFIER";
-        case TOKEN_LITERAL_STRING: return "LITERAL_STRING";
-        case TOKEN_LITERAL_CHAR: return "LITERAL_CHAR";
-        case TOKEN_LITERAL_INTEGER: return "LITERAL_INTEGER";
-        case TOKEN_LITERAL_FLOAT: return "LITERAL_FLOAT";
-        case TOKEN_LITERAL_BOOL: return "LITERAL_BOOL";
+        "VALUE", "KEYWORD", "DELIMITER", "OPERATOR", "IDENTIFIER",
+        "STRING", "CHAR", "INTEGER", "FLOAT", "BOOL", "NULL", "ARRAY",
 
         // Expressions
-        case TOKEN_EXPR_BINARY: return "EXPR_BINARY";
-        case TOKEN_EXPR_UNARY: return "EXPR_UNARY";
-        case TOKEN_EXPR_ASSIGNMENT: return "EXPR_ASSIGNMENT";
-        case TOKEN_EXPR_FUNCTION_CALL: return "EXPR_FUNCTION_CALL";
-        case TOKEN_EXPR_ARRAY_ACCESS: return "EXPR_ARRAY_ACCESS";
+        "BINARY_EXPR", "UNARY_EXPR", "ASSIGNMENT_EXPR", "FUNCTION_CALL",
+        "ARRAY_ACCESS", "MEMBER_ACCESS", "CONDITIONAL", "COMMA_EXPR",
+        "CAST_EXPR", "SIZEOF_EXPR",
 
         // Statements
-        case TOKEN_STMT_IF: return "STMT_IF";
-        case TOKEN_STMT_ELSE: return "STMT_ELSE";
-        case TOKEN_STMT_WHILE: return "STMT_WHILE";
-        case TOKEN_STMT_FOR: return "STMT_FOR";
-        case TOKEN_STMT_RETURN: return "STMT_RETURN";
-        case TOKEN_STMT_BREAK: return "STMT_BREAK";
-        case TOKEN_STMT_CONTINUE: return "STMT_CONTINUE";
+        "IF", "ELSE", "WHILE", "FOR", "DO", "SWITCH", "CASE", "DEFAULT",
+        "RETURN", "BREAK", "CONTINUE", "GOTO", "LABEL",
 
         // Declarations
-        case TOKEN_DECL_VARIABLE: return "DECL_VARIABLE";
-        case TOKEN_DECL_FUNCTION: return "DECL_FUNCTION";
-        case TOKEN_DECL_STRUCT: return "DECL_STRUCT";
-        case TOKEN_DECL_ENUM: return "DECL_ENUM";
+        "VARIABLE_DECL", "FUNCTION_DECL", "STRUCT_DECL", "UNION_DECL",
+        "ENUM_DECL", "TYPEDEF_DECL", "EXTERN_DECL", "STATIC_DECL",
+        "AUTO_DECL", "REGISTER_DECL",
 
         // Scope and blocks
-        case TOKEN_SCOPE_BEGIN: return "SCOPE_BEGIN";
-        case TOKEN_SCOPE_END: return "SCOPE_END";
-        case TOKEN_BLOCK_BEGIN: return "BLOCK_BEGIN";
-        case TOKEN_BLOCK_END: return "BLOCK_END";
+        "SCOPE_BEGIN", "SCOPE_END", "BLOCK_BEGIN", "BLOCK_END",
+        "PAREN_OPEN", "PAREN_CLOSE", "BRACKET_OPEN", "BRACKET_CLOSE",
 
         // Punctuation
-        case TOKEN_PUNCT_SEMICOLON: return "PUNCT_SEMICOLON";
-        case TOKEN_PUNCT_COMMA: return "PUNCT_COMMA";
-        case TOKEN_PUNCT_DOT: return "PUNCT_DOT";
-        case TOKEN_PUNCT_COLON: return "PUNCT_COLON";
+        "SEMICOLON", "COMMA", "DOT", "COLON", "ARROW", "ELLIPSIS",
 
         // Types
-        case TOKEN_TYPE_INT: return "TYPE_INT";
-        case TOKEN_TYPE_FLOAT: return "TYPE_FLOAT";
-        case TOKEN_TYPE_CHAR: return "TYPE_CHAR";
-        case TOKEN_TYPE_VOID: return "TYPE_VOID";
-        case TOKEN_TYPE_STRUCT: return "TYPE_STRUCT";
+        "VOID", "CHAR", "SHORT", "INT", "LONG", "FLOAT", "DOUBLE",
+        "SIGNED", "UNSIGNED", "BOOL", "COMPLEX", "STRUCT", "UNION", "ENUM",
 
         // Special
-        case TOKEN_EOF: return "EOF";
-        case TOKEN_ERROR: return "ERROR";
+        "EOF", "ERROR", "SINGLE_COMMENT", "MULTI_COMMENT", "PREPROCESSOR"
+    };
 
-        default: return "UNKNOWN_TOKEN_TYPE";
+    if (type >= 0 && type < sizeof(token_names)/sizeof(token_names[0])) {
+        return token_names[type];
+    }
+    return "UNKNOWN";
+}
+
+// Token creation and management
+Token* Token_create(TokenType type, const char* value) {
+    Token* token = (Token*)malloc(sizeof(Token));
+    if (!token) return NULL;
+
+    token->type = type;
+    token->category = TokenType_getCategory(type);
+    token->value = value ? strdup(value) : NULL;
+    token->line_number = 0;
+    token->column_number = 0;
+    token->file_name = NULL;
+    TokenAttributes_init(&token->attributes);
+    token->next = NULL;
+    token->prev = NULL;
+
+    return token;
+}
+
+void Token_destroy(Token* token) {
+    if (token) {
+        free(token->value);
+        free(token);
     }
 }
 
-// Check if token type is a literal
-bool TokenType_isLiteral(enum TokenType type) {
-    return (type >= TOKEN_LITERAL_VALUE && type <= TOKEN_LITERAL_BOOL);
+Token* Token_copy(const Token* source) {
+    if (!source) return NULL;
+
+    Token* copy = Token_create(source->type, source->value);
+    if (!copy) return NULL;
+
+    copy->line_number = source->line_number;
+    copy->column_number = source->column_number;
+    copy->file_name = source->file_name;
+    TokenAttributes_copy(&copy->attributes, &source->attributes);
+
+    return copy;
 }
 
-// Check if token type is an expression
-bool TokenType_isExpression(enum TokenType type) {
-    return (type >= TOKEN_EXPR_BINARY && type <= TOKEN_EXPR_ARRAY_ACCESS);
+bool Token_equals(const Token* t1, const Token* t2) {
+    if (!t1 || !t2) return false;
+
+    return t1->type == t2->type &&
+           strcmp(t1->value ? t1->value : "", t2->value ? t2->value : "") == 0 &&
+           TokenAttributes_equals(&t1->attributes, &t2->attributes);
 }
 
-// Check if token type is a statement
-bool TokenType_isStatement(enum TokenType type) {
-    return (type >= TOKEN_STMT_IF && type <= TOKEN_STMT_CONTINUE);
+void Token_print(const Token* token, FILE* stream) {
+    if (!token) return;
+
+    fprintf(stream, "Token[type=%s, value=%s, line=%d, col=%d]",
+            TokenType_toString(token->type),
+            token->value ? token->value : "null",
+            token->line_number,
+            token->column_number);
 }
 
-// Check if token type is a declaration
-bool TokenType_isDeclaration(enum TokenType type) {
-    return (type >= TOKEN_DECL_VARIABLE && type <= TOKEN_DECL_ENUM);
+// Context management
+TokenContext* TokenContext_create(void) {
+    TokenContext* context = (TokenContext*)malloc(sizeof(TokenContext));
+    if (!context) return NULL;
+
+    context->current = NULL;
+    context->peek = NULL;
+    context->depth = 0;
+    context->error_count = 0;
+    context->error_message = NULL;
+    context->in_preprocessing = false;
+    context->in_comment = false;
+
+    return context;
 }
 
-// Check if token type is a type specifier
-bool TokenType_isType(enum TokenType type) {
-    return (type >= TOKEN_TYPE_INT && type <= TOKEN_TYPE_STRUCT);
-}
-
-// Check if token type is a scope/block delimiter
-bool TokenType_isScope(enum TokenType type) {
-    return (type >= TOKEN_SCOPE_BEGIN && type <= TOKEN_BLOCK_END);
-}
-
-// Check if token type is punctuation
-bool TokenType_isPunctuation(enum TokenType type) {
-    return (type >= TOKEN_PUNCT_SEMICOLON && type <= TOKEN_PUNCT_COLON);
-}
-
-// Get precedence level for operator tokens
-int TokenType_getOperatorPrecedence(enum TokenType type) {
-    if (type == TOKEN_LITERAL_OPERATOR) {
-        // You would typically look at the specific operator value
-        // This is a simplified example
-        return 1;
+void TokenContext_destroy(TokenContext* context) {
+    if (context) {
+        free(context->error_message);
+        free(context);
     }
-    return 0;
 }
 
-// Check if token type requires a closing match
-bool TokenType_requiresClosing(enum TokenType type) {
+bool TokenContext_advance(TokenContext* context) {
+    if (!context || !context->peek) return false;
+
+    context->current = context->peek;
+    context->peek = context->peek->next;
+    return true;
+}
+
+Token* TokenContext_peek(TokenContext* context, int ahead) {
+    if (!context || ahead < 0) return NULL;
+
+    Token* current = context->peek;
+    for (int i = 0; i < ahead && current; i++) {
+        current = current->next;
+    }
+    return current;
+}
+
+void TokenContext_setError(TokenContext* context, const char* message) {
+    if (!context) return;
+
+    free(context->error_message);
+    context->error_message = strdup(message);
+    context->error_count++;
+}
+
+// Attribute management
+void TokenAttributes_init(TokenAttributes* attrs) {
+    if (!attrs) return;
+
+    attrs->is_const = false;
+    attrs->is_volatile = false;
+    attrs->is_static = false;
+    attrs->is_extern = false;
+    attrs->is_signed = true;
+    attrs->pointer_level = 0;
+    attrs->array_dimensions = 0;
+}
+
+void TokenAttributes_copy(TokenAttributes* dest, const TokenAttributes* source) {
+    if (!dest || !source) return;
+
+    *dest = *source;
+}
+
+bool TokenAttributes_equals(const TokenAttributes* a1, const TokenAttributes* a2) {
+    if (!a1 || !a2) return false;
+
+    return a1->is_const == a2->is_const &&
+           a1->is_volatile == a2->is_volatile &&
+           a1->is_static == a2->is_static &&
+           a1->is_extern == a2->is_extern &&
+           a1->is_signed == a2->is_signed &&
+           a1->pointer_level == a2->pointer_level &&
+           a1->array_dimensions == a2->array_dimensions;
+}
+
+// Type checking functions remain similar but with updated types
+bool TokenType_isLiteral(TokenType type) {
+    return TokenType_getCategory(type) == TOKEN_CATEGORY_LITERAL;
+}
+
+bool TokenType_isExpression(TokenType type) {
+    return TokenType_getCategory(type) == TOKEN_CATEGORY_EXPRESSION;
+}
+
+bool TokenType_isStatement(TokenType type) {
+    return TokenType_getCategory(type) == TOKEN_CATEGORY_STATEMENT;
+}
+
+bool TokenType_isDeclaration(TokenType type) {
+    return TokenType_getCategory(type) == TOKEN_CATEGORY_DECLARATION;
+}
+
+bool TokenType_isType(TokenType type) {
+    return TokenType_getCategory(type) == TOKEN_CATEGORY_TYPE;
+}
+
+bool TokenType_isScope(TokenType type) {
+    return TokenType_getCategory(type) == TOKEN_CATEGORY_SCOPE;
+}
+
+bool TokenType_isPunctuation(TokenType type) {
+    return TokenType_getCategory(type) == TOKEN_CATEGORY_PUNCTUATION;
+}
+
+int TokenType_getOperatorPrecedence(TokenType type) {
+    // Simplified precedence table
+    switch (type) {
+        case TOKEN_EXPR_MEMBER_ACCESS:
+            return 13;
+        case TOKEN_EXPR_FUNCTION_CALL:
+        case TOKEN_EXPR_ARRAY_ACCESS:
+            return 12;
+        case TOKEN_EXPR_UNARY:
+            return 11;
+        case TOKEN_EXPR_CAST:
+            return 10;
+        case TOKEN_EXPR_BINARY:
+            return 4;  // Varies based on actual operator
+        case TOKEN_EXPR_CONDITIONAL:
+            return 3;
+        case TOKEN_EXPR_ASSIGNMENT:
+            return 2;
+        case TOKEN_EXPR_COMMA:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+bool TokenType_requiresClosing(TokenType type) {
     switch (type) {
         case TOKEN_SCOPE_BEGIN:
         case TOKEN_BLOCK_BEGIN:
+        case TOKEN_PAREN_OPEN:
+        case TOKEN_BRACKET_OPEN:
             return true;
         default:
             return false;
     }
 }
 
-// Get the corresponding closing token type
-enum TokenType TokenType_getClosingType(enum TokenType type) {
+TokenType TokenType_getClosingType(TokenType type) {
     switch (type) {
         case TOKEN_SCOPE_BEGIN:
             return TOKEN_SCOPE_END;
         case TOKEN_BLOCK_BEGIN:
             return TOKEN_BLOCK_END;
+        case TOKEN_PAREN_OPEN:
+            return TOKEN_PAREN_CLOSE;
+        case TOKEN_BRACKET_OPEN:
+            return TOKEN_BRACKET_CLOSE;
         default:
             return TOKEN_ERROR;
     }
 }
 
-// Validate token type transitions for bottom-up parsing
-bool TokenType_isValidTransition(enum TokenType from, enum TokenType to) {
-    // Example transition rules:
+bool TokenType_isValidTransition(TokenType from, TokenType to) {
+    // Implement more sophisticated transition rules here
+    // This is a basic implementation that should be expanded based on language grammar
 
-    // Can transition from identifier to operator
-    if (from == TOKEN_LITERAL_IDENTIFIER && to == TOKEN_LITERAL_OPERATOR)
-        return true;
+    // Can't transition to error or EOF except in special cases
+    if (to == TOKEN_ERROR || to == TOKEN_EOF)
+        return false;
 
-    // Can transition from operator to identifier or literal
-    if (from == TOKEN_LITERAL_OPERATOR &&
-        (to == TOKEN_LITERAL_IDENTIFIER || TokenType_isLiteral(to)))
-        return true;
+    // Can't transition from EOF
+    if (from == TOKEN_EOF)
+        return false;
 
-    // Can transition from type to identifier (for declarations)
-    if (TokenType_isType(from) && to == TOKEN_LITERAL_IDENTIFIER)
-        return true;
+    // Basic transitions based on categories
+    TokenCategory fromCat = TokenType_getCategory(from);
+    TokenCategory toCat = TokenType_getCategory(to);
 
-    // Add more transition rules as needed
+    switch (fromCat) {
+        case TOKEN_CATEGORY_TYPE:
+            return toCat == TOKEN_CATEGORY_LITERAL ||
+                   to == TOKEN_PUNCT_SEMICOLON ||
+                   to == TOKEN_PUNCT_COMMA;
 
-    return false;
-}
+        case TOKEN_CATEGORY_LITERAL:
+            return toCat == TOKEN_CATEGORY_EXPRESSION ||
+                   toCat == TOKEN_CATEGORY_PUNCTUATION;
 
-// Initialize a new token type context (if needed)
-void TokenType_init() {
-    // Add any necessary initialization code
-}
+        case TOKEN_CATEGORY_EXPRESSION:
+            return toCat == TOKEN_CATEGORY_PUNCTUATION ||
+                   toCat == TOKEN_CATEGORY_EXPRESSION;
 
-// Cleanup token type context (if needed)
-void TokenType_cleanup() {
-    // Add any necessary cleanup code
+        case TOKEN_CATEGORY_PUNCTUATION:
+            return toCat == TOKEN_CATEGORY_LITERAL ||
+                   toCat == TOKEN_CATEGORY_TYPE ||
+                   toCat == TOKEN_CATEGORY_EXPRESSION;
+
+        default:
+            return true; // Allow other transitions by default
+    }
 }
