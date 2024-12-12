@@ -12,10 +12,11 @@
 // To correctly identify token we use a bottom-up
 // parser in both token and type definition.
 enum TokenType {
-    TOKEN_VALUE,
-    TOKEN_KEYWORD,
-    TOKEN_DELIMETER,
-    TOKEN_OPERATOR
+    TOKEN_LITERAL_VALUE ,
+    TOKEN_LITERAL_KEYWORD,
+    TOKEN_LITERAL_DELIMETER,
+    TOKEN_LITERAL_OPERATOR,
+    TOKEN_LITERAL_IDENTIFER
 };
 
 #endif // SYM_TYPE_H
