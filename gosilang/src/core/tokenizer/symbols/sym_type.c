@@ -3,6 +3,63 @@
 #include <string.h>
 #include <stdio.h>
 
+// Stack operations implementation
+TokenStack* CreateStack(void) {
+    TokenStack* stack = (TokenStack*)malloc(sizeof(TokenStack));
+    if (stack) {
+        stack->top = -1;
+    }
+    return stack;
+}
+
+void DestroyStack(TokenStack* stack) {
+    if (!stack) return;
+    // Note: We don't destroy the tokens here as they're managed elsewhere
+    free(stack);
+}
+
+bool IsStackEmpty(const TokenStack* stack) {
+    return (!stack || stack->top < 0);
+}
+
+bool PushToken(TokenStack* stack, Token* token) {
+    if (!stack || !token || stack->top >= MAX_STACK_SIZE - 1) {
+        return false;
+    }
+    stack->items[++stack->top] = token;
+    return true;
+}
+
+Token* PopToken(TokenStack* stack) {
+    if (IsStackEmpty(stack)) {
+        return NULL;
+    }
+    return stack->items[stack->top--];
+}
+
+Token* PeekToken(TokenStack* stack) {
+    if (IsStackEmpty(stack)) {
+        return NULL;
+    }
+    return stack->items[stack->top];
+}
+
+int GetOperatorPrecedence(const Token* token) {
+    if (!token || token->type != TOKEN_EXPR_BINARY) {
+        return -1;
+    }
+
+    if (strcmp(token->value, "*") == 0 ||
+        strcmp(token->value, "/") == 0) {
+        return 2;
+    }
+    if (strcmp(token->value, "+") == 0 ||
+        strcmp(token->value, "-") == 0) {
+        return 1;
+    }
+    return 0;
+}
+
 // Add tree visualization aids
 static void PrintExpressionTree(Token* token, int depth) {
     if (!token) return;
