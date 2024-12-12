@@ -2,8 +2,14 @@
 #include "core/tokenizer/symbols/sym_value.h"
 #include <stdio.h>
 
-// Function to demonstrate token creation and manipulation
-void demonstrate_tokens() {
+// Forward declarations of all demonstration functions
+void demonstrate_tokens(void);
+void demonstrate_symbol_table(void);
+void demonstrate_expression_parsing(void);
+void demonstrate_value_handling(void);
+
+// Function implementations
+void demonstrate_tokens(void) {
     printf("=== Token Demonstration ===\n");
 
     // Create a few tokens
@@ -25,8 +31,7 @@ void demonstrate_tokens() {
     Token_destroy(op_token);
 }
 
-// Function to demonstrate symbol table operations
-void demonstrate_symbol_table() {
+void demonstrate_symbol_table(void) {
     printf("\n=== Symbol Table Demonstration ===\n");
 
     // Create a scope hierarchy
@@ -59,7 +64,7 @@ void demonstrate_symbol_table() {
     DestroyScope(global_scope);
 }
 
-// Function to demonstrate expression parsingvoid demonstrate_expression_parsing() {
+void demonstrate_expression_parsing(void) {
     printf("\n=== Expression Parsing Demonstration ===\n");
 
     // Create tokens for expression: "a + b * c"
@@ -96,8 +101,7 @@ void demonstrate_symbol_table() {
     }
 }
 
-// Function to demonstrate value handling
-void demonstrate_value_handling() {
+void demonstrate_value_handling(void) {
     printf("\n=== Value Handling Demonstration ===\n");
 
     // Create different types of values
@@ -128,7 +132,7 @@ void demonstrate_value_handling() {
     DestroyLiteralValue(str_val);
 }
 
-int main() {
+int main(void) {
     printf("Gosilang Symbol System Demonstration\n");
     printf("===================================\n\n");
 
