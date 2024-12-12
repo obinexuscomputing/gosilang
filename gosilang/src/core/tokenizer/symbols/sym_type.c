@@ -1,6 +1,5 @@
 #include "sym_type.h"
 
-
 // Token creation and management
 Token* Token_create(TokenType type, const char* value) {
     Token* token = (Token*)malloc(sizeof(Token));
@@ -316,4 +315,181 @@ bool TokenType_isValidTransition(TokenType from, TokenType to) {
         default:
             return true; // Allow other transitions by default
     }
+}
+
+// Stack implementation for expression parsing
+#define MAX_STACK_SIZE 100
+
+typedef struct {
+    Token* items[MAX_STACK_SIZE];
+    int top;
+} TokenStack;
+
+static TokenStack* CreateStack() {
+    TokenStack* stack = (TokenStack*)malloc(sizeof(TokenStack));
+    if (stack) {
+        stack->top = -1;
+    }
+    return stack;
+}
+
+static void DestroyStack(TokenStack* stack) {
+    if (!stack) return;
+    // Don't destroy tokens here as they're managed elsewhere
+    free(stack);
+}
+
+static bool IsStackEmpty(TokenStack* stack) {
+    return stack->top < 0;
+}
+
+static bool PushToken(TokenStack* stack, Token* token) {
+    if (stack->top >= MAX_STACK_SIZE - 1) return false;
+    stack->items[++stack->top] = token;
+    return true;
+}
+
+static Token* PopToken(TokenStack* stack) {
+    if (IsStackEmpty(stack)) return NULL;
+    return stack->items[stack->top--];
+}
+
+static Token* PeekToken(TokenStack* stack) {
+    if (IsStackEmpty(stack)) return NULL;
+    return stack->items[stack->top];
+}
+
+// Get operator precedence
+static int GetOperatorPrecedence(Token* token) {
+    if (!token) return -1;
+
+    switch (token->type) {
+        case TOKEN_EXPR_BINARY:
+            if (strcmp(token->value, "*") == 0 ||
+                strcmp(token->value, "/") == 0) {
+                return 2;
+            }
+            if (strcmp(token->value, "+") == 0 ||
+                strcmp(token->value, "-") == 0) {
+                return 1;
+            }
+            break;
+        default:
+            break;
+    }
+    return 0;
+}
+
+// Create a new token for a binary operation result
+static Token* CreateBinaryOpResult(Token* left, Token* operator, Token* right) {
+    if (!left || !operator || !right) return NULL;
+
+    // Create a new token representing the operation
+    Token* result = Token_create(TOKEN_EXPR_BINARY, operator->value);
+    if (!result) return NULL;
+
+    // Store additional information if needed
+    result->line_number = operator->line_number;
+    result->column_number = operator->column_number;
+
+    return result;
+}
+
+// Enhanced ParseExpression implementation
+Token* ParseExpression(Token* tokens[], int count) {
+    if (!tokens || count <= 0) return NULL;
+
+    TokenStack* operandStack = CreateStack();
+    TokenStack* operatorStack = CreateStack();
+
+    if (!operandStack || !operatorStack) {
+        DestroyStack(operandStack);
+        DestroyStack(operatorStack);
+        return NULL;
+    }
+
+    for (int i = 0; i < count; i++) {
+        Token* current = tokens[i];
+        if (!current) continue;
+
+        switch (current->type) {
+            case TOKEN_LITERAL_IDENTIFIER:
+            case TOKEN_LITERAL_INTEGER:
+            case TOKEN_LITERAL_FLOAT:
+                // Push operands directly to operand stack
+                PushToken(operandStack, Token_copy(current));
+                break;
+
+            case TOKEN_EXPR_BINARY: {
+                // Process operators according to precedence
+                while (!IsStackEmpty(operatorStack) &&
+                       GetOperatorPrecedence(PeekToken(operatorStack)) >=
+                       GetOperatorPrecedence(current)) {
+
+                    Token* op = PopToken(operatorStack);
+                    Token* right = PopToken(operandStack);
+                    Token* left = PopToken(operandStack);
+
+                    Token* result = CreateBinaryOpResult(left, op, right);
+
+                    Token_destroy(left);
+                    Token_destroy(right);
+                    Token_destroy(op);
+
+                    if (!result || !PushToken(operandStack, result)) {
+                        // Cleanup on error
+                        Token_destroy(result);
+                        goto cleanup;
+                    }
+                }
+                PushToken(operatorStack, Token_copy(current));
+                break;
+            }
+
+            default:
+                // Invalid token type for expression
+                goto cleanup;
+        }
+    }
+
+    // Process remaining operators
+    while (!IsStackEmpty(operatorStack)) {
+        Token* op = PopToken(operatorStack);
+        Token* right = PopToken(operandStack);
+        Token* left = PopToken(operandStack);
+
+        Token* result = CreateBinaryOpResult(left, op, right);
+
+        Token_destroy(left);
+        Token_destroy(right);
+        Token_destroy(op);
+
+        if (!result || !PushToken(operandStack, result)) {
+            Token_destroy(result);
+            goto cleanup;
+        }
+    }
+
+    // Get final result
+    Token* result = PopToken(operandStack);
+
+    // Check if there are any remaining tokens (error condition)
+    if (!IsStackEmpty(operandStack)) {
+        Token_destroy(result);
+        result = NULL;
+    }
+
+cleanup:
+    // Clean up any remaining tokens in stacks
+    while (!IsStackEmpty(operandStack)) {
+        Token_destroy(PopToken(operandStack));
+    }
+    while (!IsStackEmpty(operatorStack)) {
+        Token_destroy(PopToken(operatorStack));
+    }
+
+    DestroyStack(operandStack);
+    DestroyStack(operatorStack);
+
+    return result;
 }
