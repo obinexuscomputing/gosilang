@@ -43,6 +43,7 @@ void Token_print(const Token* token, FILE* stream) {
             token->line_number,
             token->column_number);
 }
+
 // Token category mapping
 TokenCategory TokenType_getCategory(TokenType type) {
     if (type >= TOKEN_LITERAL_VALUE && type <= TOKEN_LITERAL_ARRAY)
@@ -102,13 +103,6 @@ const char* TokenType_toString(TokenType type) {
         return token_names[type];
     }
     return "UNKNOWN";
-}
-
-void Token_destroy(Token* token) {
-    if (token) {
-        free(token->value);
-        free(token);
-    }
 }
 
 
@@ -171,13 +165,7 @@ void TokenContext_setError(TokenContext* context, const char* message) {
     context->error_count++;
 }
 
-Token* ParseExpression(Token* tokens[], int count) {
-    if (!tokens || count <= 0) return NULL;
 
-    // For now, just return a copy of the first token as a simple demonstration
-    // In a real implementation, this would do proper expression parsing
-    return Token_copy(tokens[0]);
-}
 // Attribute management
 void TokenAttributes_init(TokenAttributes* attrs) {
     if (!attrs) return;
