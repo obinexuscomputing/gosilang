@@ -6,9 +6,15 @@
 #include <string.h>
 #include <stdbool.h>
 
-// Forward declarations
 struct Token;
 struct TokenContext;
+
+// Token stack definition
+#define MAX_STACK_SIZE 100
+typedef struct TokenStack {
+    struct Token* items[MAX_STACK_SIZE];
+    int top;
+} TokenStack;
 
 // Token categories for grouping similar token types
 typedef enum {
@@ -119,6 +125,7 @@ typedef enum TokenType {
     TOKEN_PREPROCESSOR
 } TokenType;
 
+
 // Token attributes for additional type information
 typedef struct TokenAttributes {
     bool is_const;
@@ -152,6 +159,15 @@ typedef struct TokenContext {
     bool in_preprocessing;
     bool in_comment;
 } TokenContext;
+
+// Stack operations
+TokenStack* CreateStack(void);
+void DestroyStack(TokenStack* stack);
+bool IsStackEmpty(const TokenStack* stack);
+bool PushToken(TokenStack* stack, struct Token* token);
+struct Token* PopToken(TokenStack* stack);
+struct Token* PeekToken(TokenStack* stack);
+int GetOperatorPrecedence(const struct Token* token);
 
 // Function declarations for token type operations
 const char* TokenType_toString(TokenType type);
