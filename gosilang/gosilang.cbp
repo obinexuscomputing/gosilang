@@ -83,8 +83,15 @@
 		<Unit filename="src/core/parser/README.md" />
 		<Unit filename="src/core/tokenizer/lexer/.gitkeep" />
 		<Unit filename="src/core/tokenizer/lexer/README.md" />
+		<Unit filename="src/core/tokenizer/sym_value.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/core/tokenizer/symbols/.gitkeep" />
 		<Unit filename="src/core/tokenizer/symbols/README.md" />
+		<Unit filename="src/core/tokenizer/symbols/sym_type.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/core/tokenizer/symbols/sym_type.h" />
 		<Unit filename="src/runtime/concurrency/futures/.gitkeep" />
 		<Unit filename="src/runtime/concurrency/futures/README.md" />
 		<Unit filename="src/runtime/concurrency/lazy/.gitkeep" />
