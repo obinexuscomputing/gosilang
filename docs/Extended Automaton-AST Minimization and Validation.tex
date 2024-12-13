@@ -1,0 +1,228 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\title{Detailed Algorithm Analysis: AST-Automaton Minimization}
+\author{Nnamdi Michael Okpala}
+\date{December 13, 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{Core Data Structures}
+
+\subsection{StateNode Representation}
+For each state-node pair $(q, n)$ where $q \in Q$ and $n$ is an AST node:
+
+\[
+\text{StateNode}(q, n) = \begin{cases}
+    \text{type}: & Q \times N \\
+    \text{transitions}: & \Sigma \rightarrow (Q \times N) \\
+    \text{ast\_children}: & \text{Set}(N) \\
+    \text{equivalence\_class}: & \mathbb{N}
+\end{cases}
+\]
+
+\subsection{Tree Structure}
+The AST node structure:
+\[
+\text{Node} = \begin{cases}
+    \text{value}: & \Sigma \cup Q \\
+    \text{children}: & \text{List}(\text{Node}) \\
+    \text{parent}: & \text{Node} \cup \{\bot\} \\
+    \text{type}: & \{\text{STATE}, \text{SYMBOL}\}
+\end{cases}
+\]
+
+\section{Algorithm Details}
+
+\subsection{Initialization Phase}
+
+\begin{algorithm}
+\caption{Initialize Combined Structure}
+\begin{algorithmic}[1]
+\Procedure{InitializeStructure}{$A, T$}
+    \State $stateNodes \gets \emptyset$
+    \State $nodeMap \gets \text{new HashMap}()$
+    \For{$q \in Q$}
+        \State $n \gets \text{FindCorrespondingNode}(q, T)$
+        \State $sn \gets \text{new StateNode}(q, n)$
+        \State $stateNodes \gets stateNodes \cup \{sn\}$
+        \State $nodeMap[q] \gets sn$
+    \EndFor
+    \For{$sn \in stateNodes$}
+        \For{$\sigma \in \Sigma$}
+            \State $nextState \gets \delta(sn.state, \sigma)$
+            \State $nextNode \gets nodeMap[nextState]$
+            \State $sn.transitions[\sigma] \gets nextNode$
+        \EndFor
+        \State $sn.ast\_children \gets \text{GetASTChildren}(sn.node)$
+    \EndFor
+    \State \Return $(stateNodes, nodeMap)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Equivalence Class Construction}
+
+\begin{algorithm}
+\caption{Build Initial Equivalence Classes}
+\begin{algorithmic}[1]
+\Procedure{BuildEquivClasses}{$stateNodes$}
+    \State $classes \gets \text{new List}()$
+    \State $accepting \gets \{sn \in stateNodes : sn.state \in F\}$
+    \State $nonAccepting \gets \{sn \in stateNodes : sn.state \notin F\}$
+    \State $classes.add(accepting)$
+    \State $classes.add(nonAccepting)$
+    \State $changed \gets true$
+    \While{$changed$}
+        \State $changed \gets false$
+        \For{$class \in classes$}
+            \State $splits \gets \text{SplitByTransitions}(class)$
+            \If{$|splits| > 1$}
+                \State $classes.remove(class)$
+                \State $classes.addAll(splits)$
+                \State $changed \gets true$
+            \EndIf
+        \EndFor
+    \EndWhile
+    \State \Return $classes$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{AST-Aware State Splitting}
+
+\begin{algorithm}
+\caption{Split States Based on AST Structure}
+\begin{algorithmic}[1]
+\Procedure{SplitByTransitions}{$class$}
+    \State $splits \gets \text{new Map}()$
+    \For{$sn \in class$}
+        \State $signature \gets \text{ComputeSignature}(sn)$
+        \If{$splits.containsKey(signature)$}
+            \State $splits[signature].add(sn)$
+        \Else
+            \State $splits[signature] \gets \{sn\}$
+        \EndIf
+    \EndFor
+    \State \Return $splits.values$
+\EndProcedure
+
+\Procedure{ComputeSignature}{$sn$}
+    \State $sig \gets \emptyset$
+    \For{$\sigma \in \Sigma$}
+        \State $nextSN \gets sn.transitions[\sigma]$
+        \State $sig \gets sig \cup \{(\sigma, nextSN.equivalence\_class)\}$
+    \EndFor
+    \For{$child \in sn.ast\_children$}
+        \State $sig \gets sig \cup \{(\text{`AST'}, child.type)\}$
+    \EndFor
+    \State \Return $Hash(sig)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Minimization Algorithm}
+
+\begin{algorithm}
+\caption{Combined AST-Automaton Minimization}
+\begin{algorithmic}[1]
+\Procedure{MinimizeAutomaton}{$A, T$}
+    \State $(stateNodes, nodeMap) \gets \text{InitializeStructure}(A, T)$
+    \State $classes \gets \text{BuildEquivClasses}(stateNodes)$
+    \State $minimizedStates \gets \emptyset$
+    \For{$class \in classes$}
+        \State $representative \gets \text{SelectRepresentative}(class)$
+        \State $minimizedStates \gets minimizedStates \cup \{representative\}$
+    \EndFor
+    \State $minimizedAST \gets \text{BuildMinimizedAST}(minimizedStates)$
+    \State \Return $(minimizedStates, minimizedAST)$
+\EndProcedure
+
+\Procedure{BuildMinimizedAST}{$minimizedStates$}
+    \State $root \gets \text{new ASTNode}()$
+    \For{$state \in minimizedStates$}
+        \State $node \gets \text{CreateASTNode}(state)$
+        \For{$\sigma \in \Sigma$}
+            \If{$state.transitions[\sigma] \in minimizedStates$}
+                \State $\text{AddTransitionToAST}(node, \sigma, state.transitions[\sigma])$
+            \EndIf
+        \EndFor
+        \State $\text{AddNodeToAST}(root, node)$
+    \EndFor
+    \State \Return $root$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\section{Complexity Analysis}
+
+\subsection{Time Complexity}
+For an automaton with $|Q|$ states and AST with $|N|$ nodes:
+
+\begin{itemize}
+\item Initialization: $O(|Q| \log |N|)$
+\item Building equivalence classes: $O(|Q|^2|\Sigma|)$
+\item AST optimization: $O(|Q|\log |N|)$
+\end{itemize}
+
+Total worst-case complexity: $O(|Q|^2|\Sigma| + |Q|\log |N|)$
+
+\subsection{Space Complexity}
+\[
+Space(Q, N) = O(|Q| + |N| + |Q||\Sigma|)
+\]
+
+\section{Key Properties}
+
+\begin{theorem}[Correctness]
+The minimized automaton accepts the same language as the original automaton.
+\end{theorem}
+
+\begin{proof}
+For any word $w \in \Sigma^*$:
+\begin{enumerate}
+    \item States in the same equivalence class are indistinguishable
+    \item The AST structure preserves all transition paths
+    \item Therefore, acceptance of $w$ is preserved
+\end{enumerate}
+\end{proof}
+
+\begin{theorem}[AST Consistency]
+The minimized AST preserves all valid transition paths of the original automaton.
+\end{theorem}
+
+\begin{proof}
+By construction, each transition in the minimized automaton corresponds to a valid path in the minimized AST.
+\end{proof}
+
+\section{Implementation Notes}
+
+\subsection{Data Structure Optimizations}
+\begin{itemize}
+\item Use hash tables for $O(1)$ state lookups
+\item Implement lazy AST node creation
+\item Cache transition computations
+\item Use bit vectors for set operations
+\end{itemize}
+
+\subsection{Memory Management}
+\begin{itemize}
+\item Pre-allocate node pools for common operations
+\item Implement reference counting for AST nodes
+\item Use flyweight pattern for shared state data
+\item Employ memory-mapped structures for large automata
+\end{itemize}
+
+\end{document}
